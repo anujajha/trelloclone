@@ -1,0 +1,91 @@
+<html>
+    <head>
+        <title> Login Page </title>
+        <style>
+            .error{
+                color: red; 
+                font-size: 10pt;
+            }
+            .loginForm{
+                border: 3px solid black; text-align: center; width:400px; margin:0 auto;
+            }
+            .loginForm table {
+                margin: 0 auto;
+            }
+        </style>
+        <script>
+            function validateEmail(id, divId) {
+                const email = document.getElementById(id);
+                const emailError = document.getElementById(divId);
+                const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+                if (email.value.match(emailRegex)) {
+                    emailError.innerHTML = "";
+                    return true;
+                } else {
+                    emailError.innerHTML = "Please enter a valid email address.";
+                    return false;
+                }
+            }
+            function validatePass(){
+                var password1 = document.getElementById('userpassword').value
+                //validating password
+                if(password1.length < 8){
+                    document.getElementById('passValid').innerHTML = "Minimum 8 Characters";
+                    return false;
+                }else{
+                    document.getElementById('passValid').innerHTML = "";
+                    return true;
+                }
+            }
+            function validateForm(){
+                if(validateEmail('email', 'emailValid') && validatePass()){
+                    document.getElementById('Submitbtn').removeAttribute('disabled');
+                }
+            }
+        </script>
+    </head>
+
+    <body>
+        <div style="float: right; font-size: 15px;">
+            <b>New user? Register <a href="/register">here</a></b>
+        </div>
+        <h1> Log in </h1> 
+        
+        <div class="loginForm">
+            <form action="/login/post" method="POST" style="padding:15px;">
+                <table>
+                    <tr>
+                        <td>
+                            <label for="email">Email ID:</label>
+                        </td>
+                        <td>
+                            <input type="text" id="email" name="email" oninput="validateEmail('email', 'emailValid')" required>
+                            <div id="emailValid" class="error"> </div>
+                        </td>
+                    </tr>
+                    <tr><td></td></tr>
+                    <tr>
+                        <td>
+                            <label for="userpassword"> Password:</label>
+                        </td>
+                        <td>
+                            <input type="password" id="userpassword" name="userpassword" oninput="validatePass(), validateForm()" required>
+                            <div id="passValid" class="error"> </div>
+                        </td>
+                        <tr>
+                            <td>
+                                &nbsp;
+                            </td>
+                        </tr>
+                    </tr>
+                </table>
+                <input type="submit" value="Submit" id="Submitbtn" disabled>
+                <a href="" style="font-size: 12px;">Forgot Password?</a>
+            </form>
+        </div>
+        
+        
+    </body>
+
+ </html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      .heading{
+        text-align: center;
+        font-weight: 500;
+        color: rgb(179, 156, 5);
+        background-color: rgb(20, 108, 105);
+        border: 2px solid rgb(20, 108, 105);
+        font-family: cursive;
+        }
+        .button0{
+          width: 60px; 
+          height: 40px;
+          border-radius: 50%;
+        }
+        .button0:hover, .list-footer:hover{
+          background-color: azure;
+        }
+        .board {
+          display: flex;
+          padding: 20px;
+        }
+        .list {
+          float:left;
+          width: 300px;
+          background-color: #75ada6;
+          border: 2px solid black;
+          padding: 10px;
+          margin: 10px;
+          height: auto; 
+        }
+        .list-header {
+          height: 40px;
+          --background-color: #64928c;
+          color: #333;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          padding: 0 10px;
+          border-radius: 5px 5px 5px 5px;
+        }
+        ul {
+          list-style: none;
+          padding: 10px;
+          max-height: 300px;
+          overflow-y: auto;
+        }
+        .card {
+          padding: 10px;
+          margin-bottom: 10px;
+          background-color: #b4c5c4;
+          border-radius: 5px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .add-button {
+          height: 40px;
+          background-color: rgb(228, 224, 224);
+          color: #333;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 5px 5px 5px 5px;
+          width: 100px; height: 40px;
+          float: right;
+        }
+        .card-text {
+          border: 1px solid #ccc;
+          padding: 5px;
+          width:100%;
+        }
+    </style>
+    <script>
+      // function allowDrop(ev) {
+      //   ev.preventDefault();
+      // }
+      
+      // function drag(ev) {
+      //   ev.dataTransfer.setData("text", ev.target.id);
+      // }
+      
+      // function drop(ev) {
+      //   ev.preventDefault();
+      //   var data = ev.dataTransfer.getData("text");
+      //   ev.target.appendChild(document.getElementById(data));
+      // }
+/*
+      document.addEventListener('DOMContentLoaded', () => {
+        const addCardButton = document.getElementById('add-card-button');
+        addCardButton.addEventListener('click', () => {
+          const list = addCardButton.closest('.list');
+          const listId = list.id;
+          const newCard = document.createElement('div');
+          newCard.className = 'card';
+          // newCard.draggable = true;
+          // newCard.ondragstart = drag;
+          newCard.innerHTML = `
+            <span class="card-text" contentEditable="true"></span>
+          `;
+          const listBody = list.querySelector('.list-body');
+          listBody.appendChild(newCard);
+        });
+      });
+  */
+
+    </script>
+  </head>
+  <body style="background-color: #fafafa; margin: 0; padding: 0;">
+    <script>
+      //Event on ready DOM
+      document.addEventListener("DOMContentLoaded", function getLists() {
+          fetch('/api/getCards')
+              .then((response) => response.json())
+              .then((lists) => {
+                  console.log(lists);
+                  createLists(lists);                  
+                  //You can play here doing a loop and using de iterator "i" for make it at one.
+                //Example: document.querySelector(".faq--0" + i + "h1").innerHTML = json[0].title;
+                  //Example: document.querySelector(".faq--0" + i + " p").innerHTML = json[0].answer;
+                  //document.getElementById("list-header").innerHTML = json[0].title;
+                  //document.getElementById("card1").innerHTML = json[0].cards;
+              })
+      });
+
+      function delCard(){
+
+      }
+
+      //create the lists
+      function createLists (lists) {
+        //get the board div
+        const elemBoard = document.getElementById('board');
+        //now loop thru the lists
+        for (let i = 0; i < lists.length; i++) {
+          console.log(lists[i]);
+          const newList = createList(lists[i]);
+          //add list to board
+          elemBoard.appendChild(newList);
+        }
+      }
+
+      function createList (list) {
+        //create a new DIV for this list
+        const newList = document.createElement('div');
+        newList.setAttribute("id", list.id);
+        newList.classList.add("list");
+
+        //add header for this list
+        const newListHeader = document.createElement('div');
+        newListHeader.innerHTML = list.title;
+        newListHeader.classList.add("list-header");
+        newListHeader.setAttribute("id", list.id);  //list header id and list id are same for now
+        newListHeader.contentEditable = true;
+        newListHeader.addEventListener("input", titleInput );
+        newListHeader.addEventListener("blur", listHeaderBlur );
+        //append header into list
+        newList.appendChild(newListHeader);
+
+        //we append the cards to the list's body element
+        const newListBody = document.createElement('div'); 
+        newListBody.classList.add("list-body");
+
+        //send the array of cards to the cards creator
+        var cardElements = createCards(list.cards, list.id); //this hold the entire list of cards
+        newListBody.appendChild(cardElements);
+        newList.appendChild(newListBody);
+
+        const newListFooter = createListFooter(list.id);
+        newList.appendChild(newListFooter);
+        return newList;
+      }
+
+      //creates a new list
+      // changed newListId to listId
+      function createNewList () {
+        const listId = createGUID();
+        const newList = { id: listId, title: "", cards: [] };
+        const newListElement = createList(newList);
+        const elemBoard = document.getElementById('board');
+        elemBoard.appendChild(newListElement);
+      }
+
+      // function to generate random id for new list/card
+      function createGUID() {
+          return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+          .replace(/[xy]/g, function (c) {
+              const r = Math.random() * 16 | 0, 
+                  v = c == 'x' ? r : (r & 0x3 | 0x8);
+              return v.toString(16);
+          });
+      }
+
+      // this function takes the array of cards (of a list)
+      // and creates the respective HTML elements and returns to the caller
+      // takes array of cards & the id of the parent List
+      function createCards (cards, listId) {
+        // a wrapper to hold the multiple cards
+        const newCardsContainner = document.createElement('div');
+        
+        for( let j = 0; j < cards.length; j++){
+          //add header for this list
+          //add the card to the cards container
+          let card = cards[j];
+          console.log(card);
+          let elemCard = createCard (card, listId);
+          newCardsContainner.appendChild (elemCard);
+        }
+
+        return newCardsContainner;
+      }
+
+      //creates individual cards
+      function createCard (card, listId) {
+          const newCard = document.createElement('div');
+          newCard.setAttribute("id", card.id);
+          newCard.dataset.list = listId;
+          newCard.innerHTML = card.title ? card.title : "";
+          newCard.contentEditable = true; //to make the card text editable
+          newCard.addEventListener("input", titleInput );
+          newCard.addEventListener("blur", cardBlur );
+          newCard.classList.add ("card");
+          return newCard;
+        }
+
+        // this creates a new card
+        // there is no ID or title yet
+        // we need to know in which list it this card to be added
+        // if not present card.id, means that this is a new card being made
+        // we use createGUID to create a new ID for this card
+        // TODO
+      function createNewCard (e) {
+          let listId = e.currentTarget.getAttribute("data-for");
+          console.log ('inserting new card --> ' + listId);
+          const newCardId = createGUID();
+          let blankCardObj = {id: newCardId, title:""}; //a blank card obj
+          let newCard = createCard (blankCardObj, listId);
+          insertCardInList (listId, newCard);
+      }
+
+      // this helper function pushes one (or more?) cards to a an existing list, towards the end
+      function insertCardInList (listId, card) {
+        console.log ('inserting card in list ID: ' + listId);
+        let elemList = document.getElementById(listId);
+        let elemListBody = elemList.querySelector('.list-body');
+        elemListBody.appendChild (card);
+      }
+
+      // creates a list's footer
+      function createListFooter (listId) {
+        //<button class="list-footer" id="add-list-button"> + Add List </button>
+          //add header for this list
+          const elem = document.createElement('div');
+          const btn = document.createElement ('button');
+          btn.classList.add ("add-button");
+          btn.textContent = "Add Card";
+          btn.dataset.for = listId;
+          btn.addEventListener("click", createNewCard );
+          elem.appendChild (btn);
+          return elem;
+      }
+
+      // called after the user has dirtied a card
+      // we do things here
+      function titleInput (e) {
+        //being here means that the elemenst has been changed i.e. made dirty
+        //we store a dirty flag in the element itself
+        let isDirty = e.currentTarget.dataset.dirty 
+        if (!isDirty) e.currentTarget.dataset.dirty = "true";
+          //alert(e.value);
+          console.log ("Input");
+         // /trelloclone/post
+      }
+
+      function cardBlur (e) {
+        let isDirty = e.currentTarget.dataset.dirty //e.currentTarget.getAttribute("data-dirty");
+
+        if (isDirty) {
+          //this element was changed!
+          //inform server
+          console.log ("This element was changed");
+          saveCard (e);
+        } else {
+          //do nothing
+        }
+      }
+
+      // saves the card to the server
+      function saveCard (e) {
+        let card = e.currentTarget;
+        let cardId = card.getAttribute("id");
+        let cardListId = card.dataset.list;
+        console.log ("save changes for card ID: " + cardId);
+
+        fetch('/api/cards/save/', {
+            method: 'POST',
+            body: JSON.stringify({"id":cardId, "listId" : cardListId, "title": e.currentTarget.textContent}),headers: { "Content-Type": "application/json" }
+            }).then(response => {
+                console.log (response);
+                if(response.error){
+                alert(response.error);  
+            }
+            if(response.ok){
+                return response.json();  
+            }
+                throw new Error('Request failed!');
+            }, networkError => {
+            console.log(networkError.message);
+            }).then(jsonResponse => {
+            console.log(jsonResponse);
+            //window.location = "/js";
+            })
+        }
+
+
+    </script>
+    <div class="heading">
+      <h1> TRELLO </h1>
+    </div>
+    <div style="background-color: rgb(48, 132, 129); height: 50px; align-content: center;">
+      <label>&#x1F50E;</label><input type="search" placeholder="search boards">
+      <input type="button" class="button0" value="Boards"/ onclick="">
+      <input type="button" class="button0" value="Users"/ onclick="">
+      <input type="button" class="button0" style="float: right;" value="Menu"/ onclick="">
+      <input type="button" class="button0" style="float: right;" value="Profile"/ onclick="">
+    </div>
+    <div id="board">
+    <!--  
+      <div class="list" id="list1">
+        <div class="list-header" id="list-header"></div><br>
+        <div class="list-body">
+          <div class="card" id="card1" data-id="" onchange="doSomething(this)">
+            <span class="card-text" contentEditable="true"></span>
+            <input type="button" class="delbutton" style="float: right;" value="Delete"/ onclick="delCard()">
+          </div>
+        </div>
+        <div class="list-footer">
+          <button class="add-button" id="add-card-button">Add card</button>
+        </div>
+      -->
+      </div>
+      <button class="add-button" id="add-list-button" onclick="createNewList()"> + Add List </button>
+    </div>
+  </div>
+  </body>
+</html>

@@ -1,0 +1,192 @@
+<html>
+    <head>
+        <title> Sign Up Page </title>
+        <style>
+            .error{
+                color: red; 
+                font-size: 10pt;
+            }
+        </style>
+        <script>
+            function validatePass(){
+                var password1 = document.getElementById('userpassword').value
+                //validating password
+                if(password1.length < 8){
+                    document.getElementById('passValid').innerHTML = "Minimum 8 Characters";
+                    return false;
+                }else{
+                    document.getElementById('passValid').innerHTML = "";
+                    return true;
+                }
+            }
+
+            function validateConfPass(){
+                var password1 = document.getElementById('userpassword').value
+                var password2 = document.getElementById('cuserpassword').value
+                //checks whether password = confirm password 
+                if(password1 == password2){
+                    document.getElementById('cpassValid').innerHTML = "";
+                    return true;
+                }else{
+                    document.getElementById('cpassValid').innerHTML = "Passwords must be the same!";
+                    //alert("Passwords must be the same!");
+                    return false;
+                }
+            }
+
+            // Validates name input
+            function validateName(id, divId) {
+                const name = document.getElementById(id);
+                const nameError = document.getElementById(divId);
+                const nameRegex = /^[a-zA-Z ]{2,30}$/;
+
+                if (name.value.match(nameRegex)) {
+                    nameError.innerHTML = "";
+                    return true;
+                } else {
+                    nameError.innerHTML = "Only letters and spaces are allowed, 2-30 characters long.";
+                    return false;
+                }
+            }
+
+            // Validates email input
+            function validateEmail(id, divId) {
+                const email = document.getElementById(id);
+                const emailError = document.getElementById(divId);
+                const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+                if (email.value.match(emailRegex)) {
+                    emailError.innerHTML = "";
+                    return true;
+                } else {
+                    emailError.innerHTML = "Please enter a valid email address.";
+                    return false;
+                }
+            }
+
+            // Validates phone number input
+            function validatePhone(id, divId) {
+                const phone = document.getElementById(id);
+                const phoneError = document.getElementById(divId);
+                const phoneRegex = /^[6-9]\d{9}$/;
+
+                if (phone.value.match(phoneRegex)) {
+                    phoneError.innerHTML = "";
+                    return true;
+                } else {
+                    phoneError.innerHTML = "Please enter a valid 10-digit phone number.";
+                    return false;
+                }
+            }
+            function validateForm(){
+                if(validateName('usersname', 'unameValid') && validateEmail('email', 'emailValid') && validatePhone('phone', 'phoneValid') && validatePass() && validateConfPass()){
+                    document.getElementById('btnSubmit').removeAttribute('disabled');
+                }
+            }
+
+        </script>
+    </head>
+
+    <body>
+        <div style="float: right; font-size: 15px;">
+            <b>Already have an account? <a href="/login">Log-In</a></b>
+        </div>
+        <h1>Create Account</h1>
+        <div style="border: 3px solid black; text-align: center; width:400px; margin:0 auto;">
+            <form action="/register/post" method="POST" style="padding:15px" onsubmit="">
+                <table style="margin: 0 auto;">
+                    <tr>
+                        <td>
+                            <label for="usersname">Name:</label>
+                        </td>
+                        <td>
+                            <input type="text" id="usersname" name="usersname" oninput="validateName('usersname', 'unameValid')" required>
+                            <div id="unameValid" class="error"> </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="email">Email ID:</label>
+                        </td>
+                        <td>
+                            <input type="text" id="email" name="email" oninput="validateEmail('email', 'emailValid')" required>
+                            <div id="emailValid" class="error"> </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="phone">Phone Number:</label>
+                        </td>
+                        <td>
+                            <input type="tel" id="phone" name="phone" maxlength="10" oninput="validatePhone('phone', 'phoneValid')" required>
+                            <div id="phoneValid" class="error"> </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="userpassword"> Password:</label>
+                        </td>
+                        <td>
+                            <input type="password" id="userpassword" name="userpassword" oninput="validatePass()" required>
+                            <div id="passValid" class="error"> </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="cuserpassword"> Confirm Password:</label>
+                        </td>
+                        <td>
+                            <input type="password" id="cuserpassword" name="cuserpassword" oninput="validateConfPass(), validateForm()" required>
+                            <div id="cpassValid" class="error"> </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        </td>
+                        <td>
+                            <input type="submit" value="Submit" id="btnSubmit" class="btnSubmit" disabled>
+                        </td>
+                    </tr>
+                </table>
+                
+                
+            </form>
+        </div>
+           
+    <script>
+        //we programatically post this form to our server
+        //if the server returns an error, we display that to the user
+        //else we show successful registration message and redirect the page to /login
+        function postForm (e) {
+            fetch('/register/post', {
+            method: 'POST',
+            body: JSON.stringify({"name":"a","email":"b","phone":"c"})
+            }).then(response => {
+                console.log (response);
+                if(response.error){
+                alert(response.error);  
+            }
+            if(response.ok){
+                return response.json();  
+            }
+                throw new Error('Request failed!');
+            }, networkError => {
+            console.log(networkError.message);
+            }).then(jsonResponse => {
+            console.log(jsonResponse);
+            //window.location = "/js";
+            })
+        }
+    </script>         
+
+
+
+    </body>
+ </html>
